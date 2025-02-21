@@ -30,3 +30,17 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+class PropertyCreate(BaseModel):
+    name: str
+    location: str
+
+class PropertyResponse(BaseModel):
+    id: int
+    name: str
+    location: str
+    landlord_id: int
+
+    class Config:
+        from_attributes = True

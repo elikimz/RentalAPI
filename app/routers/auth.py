@@ -74,15 +74,12 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     return user
 
-def require_role(required_role: str):
-    def role_checker(current_user: models.User = Depends(get_current_user)):
-        if current_user.role != required_role:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to access this resource",
-            )
+def require_role(allowed_roles: list):
+    def role_dependency(current_user: models.User = Depends(get_current_user)):
+        if current_user.role.lower() not in [role.lower() for role in allowed_roles]:  # ✅ Case-insensitive check
+            raise HTTPException(status_code=403, detail="You do not have permission to access this resource")
         return current_user
-    return role_checker
+    return role_dependency
 
 @router.get("/me", response_model=schemas.UserResponse)
 def get_user_info(current_user: models.User = Depends(get_current_user)):
