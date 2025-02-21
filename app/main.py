@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from app.database import engine, Base
+# from app.database import engine, Base
 import app.models  # Ensure all models are imported
 from app.routers import auth, user,properties,units,tenant,lease,payments
 
 # ✅ Create tables
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 # ✅ Initialize FastAPI app
 app = FastAPI()
