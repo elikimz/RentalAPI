@@ -1,6 +1,8 @@
 from logging.config import fileConfig
 from sqlalchemy import create_engine, pool
 from alembic import context
+# env.py
+from app.models import User, Property, Unit, Tenant, Lease, Payment  # Import your models here
 
 # Import your database models
 from app.database import Base  
