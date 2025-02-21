@@ -106,28 +106,3 @@ def delete_tenant(
     return {"message": "Tenant deleted successfully"}
 
 
-# # 📝 Create Lease (Link Tenant to Unit)
-# @router.post("/leases", response_model=LeaseResponse)
-# def create_lease(
-#     lease_data: LeaseCreate,
-#     db: Session = Depends(get_db)
-# ):
-#     tenant = db.query(Tenant).filter(Tenant.id == lease_data.tenant_id).first()
-#     if not tenant:
-#         raise HTTPException(status_code=404, detail="Tenant not found")
-
-#     unit = db.query(Unit).filter(Unit.id == lease_data.unit_id).first()
-#     if not unit:
-#         raise HTTPException(status_code=404, detail="Unit not found")
-
-#     # Create lease
-#     new_lease = Lease(
-#         tenant_id=tenant.id,
-#         unit_id=unit.id,
-#         start_date=lease_data.start_date,
-#         end_date=lease_data.end_date
-#     )
-#     db.add(new_lease)
-#     db.commit()
-#     db.refresh(new_lease)
-#     return new_lease

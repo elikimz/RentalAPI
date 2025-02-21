@@ -1,13 +1,19 @@
 from fastapi import FastAPI
-# from app.database import engine, Base
+from fastapi.middleware.cors import CORSMiddleware
 import app.models  # Ensure all models are imported
-from app.routers import auth, user,properties,units,tenant,lease,payments
-
-# ✅ Create tables
-# Base.metadata.create_all(bind=engine)
+from app.routers import auth, user, properties, units, tenant, lease, payments
 
 # ✅ Initialize FastAPI app
 app = FastAPI()
+
+# ✅ Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change this to specific domains for security
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 # ✅ Include Routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])

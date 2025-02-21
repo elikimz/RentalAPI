@@ -43,21 +43,34 @@ def register_user(user_data: schemas.UserCreate, db: Session = Depends(database.
     # Hash the user's password
     hashed_password = utils.hash_password(user_data.password)
     
-    # Create the new user object with the correct role
+    # Create the new user object
     new_user = models.User(
         full_name=user_data.full_name,
         email=user_data.email,
         password=hashed_password,
-        role=role,  # Set role based on the first user check
-        is_active=True  # Set the user as active by default
+        role=role,  # Set role based on first user check
+        is_active=True
     )
     
-    # Add user to database and commit
+    # Add user to database
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     
+    # ✅ If the user is a Tenant, also create a Tenant entry
+    if role == "Tenant":
+        new_tenant = models.Tenant(
+            user_id=new_user.id,  # Link Tenant to the User
+            full_name=new_user.full_name,
+            email=new_user.email,
+            phone_number=user_data.phone_number  # Ensure `phone_number` is added to UserCreate schema
+        )
+        db.add(new_tenant)
+        db.commit()
+        db.refresh(new_tenant)
+
     return new_user
+
 
 # Route to login and generate an access token
 @router.post("/token", response_model=schemas.Token)

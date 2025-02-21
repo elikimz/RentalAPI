@@ -6,6 +6,7 @@ class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
+    phone_number: str
     # role: str  # "admin", "landlord", "tenant"
 
 class UserResponse(BaseModel):
@@ -51,7 +52,7 @@ class PropertyResponse(BaseModel):
 class UnitCreate(BaseModel):
     name: str
     status: Optional[str] = "available"  # Defaults to "available"
-    property_id: Optional[int] = None  # Add property_id here
+    # property_id: Optional[int] = None  # Add property_id here
 
 # 🔄 Schema for returning unit data
 class UnitResponse(UnitCreate):
