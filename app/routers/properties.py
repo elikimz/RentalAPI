@@ -9,90 +9,99 @@ from app.routers.auth import get_current_user, require_role  # Import role prote
 
 router = APIRouter()
 
-
-# 🏠 Create Property (Only Landlords)
+# 🏠 Create Property (Admins only)
 @router.post("/", response_model=PropertyResponse)
 def create_property(
     property_data: PropertyCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["Landlord,Admin"]))
+    current_user: User = Depends(require_role(["Admin"]))  # Only Admin can create properties
 ):
     new_property = Property(
         name=property_data.name,
         location=property_data.location,
-        landlord_id=current_user.id  # Assign to logged-in landlord
+        admin_id=current_user.id  # Automatically assign the logged-in user (admin) as the property owner
     )
+    
     db.add(new_property)
     db.commit()
     db.refresh(new_property)
     return new_property
 
 
-# 📋 Get All Properties (Admins see all, Landlords see their own)
+# 📋 Get All Properties (Admins see all, Tenants see their own rented properties)
 @router.get("/", response_model=List[PropertyResponse])
 def get_properties(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)  # Ensure user is authenticated
 ):
     if current_user.role == "Admin":
         return db.query(Property).all()  # Admins get all properties
-    return db.query(Property).filter(Property.landlord_id == current_user.id).all()  # Landlords get their own
+    
+    # For Tenants, fetch only properties they are renting (assuming there is a relationship)
+    return db.query(Property).join(User).filter(User.id == current_user.id).all()  # Assuming a tenant-property relationship
 
 
-# 🔍 Get Single Property (Only Admins or the Owner)
+# 🔍 Get Single Property (Admins or Tenants who are renting the property)
 @router.get("/{property_id}", response_model=PropertyResponse)
 def get_property(
     property_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)  # Ensure user is authenticated
 ):
     property = db.query(Property).filter(Property.id == property_id).first()
     if not property:
         raise HTTPException(status_code=404, detail="Property not found")
 
-    if current_user.role != "Admin" and property.landlord_id != current_user.id:
+    # Admins can view any property, tenants can only view properties they are renting
+    if current_user.role == "Admin" or current_user.id == property.admin_id:
+        return property  # Admins and landlords can view
+
+    # If the user is a tenant, check if they are renting the property
+    if current_user.role == "Tenant" and current_user.id == property.admin_id:
+        return property  # Tenants can view only their rented property
+    else:
         raise HTTPException(status_code=403, detail="Not authorized to view this property")
 
-    return property
 
-
-# ✏️ Update Property (Only Landlords Who Own the Property)
+# ✏️ Update Property (Admins only)
 @router.put("/{property_id}", response_model=PropertyResponse)
 def update_property(
     property_id: int,
     property_data: PropertyCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["Landlord"]))
+    current_user: User = Depends(require_role(["Admin"]))  # Only Admin can update properties
 ):
     property = db.query(Property).filter(Property.id == property_id).first()
     if not property:
         raise HTTPException(status_code=404, detail="Property not found")
 
-    if property.landlord_id != current_user.id:
+    # Admins can update any property
+    if current_user.role == "Admin":
+        property.name = property_data.name or property.name
+        property.location = property_data.location or property.location
+
+        db.commit()
+        db.refresh(property)
+        return property
+    else:
         raise HTTPException(status_code=403, detail="Not authorized to update this property")
 
-    property.name = property_data.name or property.name
-    property.location = property_data.location or property.location
 
-    db.commit()
-    db.refresh(property)
-    return property
-
-
-# ❌ Delete Property (Only Landlords Who Own the Property)
+# ❌ Delete Property (Admins only)
 @router.delete("/{property_id}")
 def delete_property(
     property_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["Landlord"]))
+    current_user: User = Depends(require_role(["Admin"]))  # Only Admin can delete properties
 ):
     property = db.query(Property).filter(Property.id == property_id).first()
     if not property:
         raise HTTPException(status_code=404, detail="Property not found")
 
-    if property.landlord_id != current_user.id:
+    # Admins can delete any property
+    if current_user.role == "Admin":
+        db.delete(property)
+        db.commit()
+        return {"message": "Property deleted successfully"}
+    else:
         raise HTTPException(status_code=403, detail="Not authorized to delete this property")
-
-    db.delete(property)
-    db.commit()
-    return {"message": "Property deleted successfully"}
