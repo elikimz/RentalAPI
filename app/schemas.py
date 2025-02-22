@@ -38,14 +38,14 @@ class TokenData(BaseModel):
 class PropertyCreate(BaseModel):
     name: str
     location: str
-    description:str
+    description: Optional[str] = ""
 
 
 class PropertyResponse(BaseModel):
     id: int
     name: str
     location:str 
-    description:str
+    description: Optional[str] = ""  
   
 
     class Config:

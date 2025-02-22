@@ -129,7 +129,7 @@ def create_property(
     new_property = Property(
         name=property_data.name,
         location=property_data.location,
-        description=property_data.description,  # Handle description
+        description=property_data.description or "",  # Handle null descriptions
         admin_id=current_user.id
     )
     
@@ -145,10 +145,12 @@ def get_properties(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role == "Admin":
-        return db.query(Property).all()
+    properties = db.query(Property).all()
     
-    return db.query(Property).join(User).filter(User.id == current_user.id).all()
+    for prop in properties:
+        prop.description = prop.description or ""
+    
+    return properties
 
 
 # 🔍 Get Single Property
@@ -163,9 +165,11 @@ def get_property(
         raise HTTPException(status_code=404, detail="Property not found")
 
     if current_user.role == "Admin" or current_user.id == property.admin_id:
+        property.description = property.description or ""
         return property
 
     if current_user.role == "Tenant" and current_user.id == property.admin_id:
+        property.description = property.description or ""
         return property
     else:
         raise HTTPException(status_code=403, detail="Not authorized to view this property")
@@ -186,7 +190,7 @@ def update_property(
     if current_user.role == "Admin":
         property.name = property_data.name or property.name
         property.location = property_data.location or property.location
-        property.description = property_data.description or property.description  # Update description
+        property.description = property_data.description or property.description or ""
 
         db.commit()
         db.refresh(property)
