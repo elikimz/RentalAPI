@@ -22,6 +22,7 @@ class Property(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     location = Column(String, nullable=False)
+    description = Column(String, nullable=True)  
     admin_id = Column(Integer, ForeignKey("users.id"))  # Refers to the user (admin/owner)
 
     admin = relationship("User", back_populates="properties")

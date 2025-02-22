@@ -38,11 +38,14 @@ class TokenData(BaseModel):
 class PropertyCreate(BaseModel):
     name: str
     location: str
+    description:str
+
 
 class PropertyResponse(BaseModel):
     id: int
     name: str
-    location: str
+    location:str 
+    description:str
   
 
     class Config:
