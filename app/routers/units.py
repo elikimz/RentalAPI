@@ -3,20 +3,19 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.models import Unit
+from app.models import Property, Unit, User
 from app.schemas import UnitCreate, UnitResponse
 from app.routers.auth import get_current_user, require_role
 
 router = APIRouter()
 
 # Create a Unit
-@router.post("/units/create", response_model=UnitResponse)
-async def create_unit(
-    unit_data: UnitCreate,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(require_role(["Admin"]))
-):
-    new_unit = Unit(**unit_data.dict())
+def create_unit(unit: UnitCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    property = db.query(Property).filter(Property.id == unit.property_id).first()
+    if not property:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    new_unit = Unit(**unit.model_dump())
     db.add(new_unit)
     db.commit()
     db.refresh(new_unit)
