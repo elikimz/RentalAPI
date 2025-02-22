@@ -9,20 +9,34 @@ from app.routers.auth import get_current_user, require_role
 
 router = APIRouter()
 
-# Create a Unit
-def create_unit(unit: UnitCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    property = db.query(Property).filter(Property.id == unit.property_id).first()
-    if not property:
-        raise HTTPException(status_code=404, detail="Property not found")
 
-    new_unit = Unit(**unit.model_dump())
+# Create a Unit (Admin only)
+# Create a Unit
+@router.post("/units", response_model=UnitResponse)
+def create_unit(
+    unit: UnitCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Fetch the property linked to the current user
+    property = db.query(Property).filter(Property.id == current_user.id).first()
+    if not property:
+        raise HTTPException(status_code=404, detail="No property found for the current user")
+
+    new_unit = Unit(
+        name=unit.name,
+        status=unit.status,
+        property_id=property.id  # Assign the property ID automatically
+    )
+
     db.add(new_unit)
     db.commit()
     db.refresh(new_unit)
     return new_unit
 
 
-# Get All Units
+
+# Get All Units (Protected)
 @router.get("/units", response_model=List[UnitResponse])
 async def get_units(
     db: Session = Depends(get_db),
@@ -31,7 +45,7 @@ async def get_units(
     return db.query(Unit).all()
 
 
-# Get Unit by ID
+# Get Unit by ID (Protected)
 @router.get("/units/{unit_id}", response_model=UnitResponse)
 async def get_unit(unit_id: int, db: Session = Depends(get_db)):
     unit = db.query(Unit).filter(Unit.id == unit_id).first()
@@ -40,7 +54,7 @@ async def get_unit(unit_id: int, db: Session = Depends(get_db)):
     return unit
 
 
-# Update Unit
+# Update Unit (Admin only)
 @router.put("/units/{unit_id}", response_model=UnitResponse)
 async def update_unit(
     unit_id: int,
@@ -58,7 +72,7 @@ async def update_unit(
     return unit
 
 
-# Delete Unit
+# Delete Unit (Admin only)
 @router.delete("/units/{unit_id}")
 async def delete_unit(
     unit_id: int,
@@ -73,3 +87,4 @@ async def delete_unit(
     return {"message": "Unit deleted successfully"}
 
 
+# Let me know if you want any adjustments or more features! 🚀

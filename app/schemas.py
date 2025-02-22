@@ -60,7 +60,7 @@ class UnitCreate(BaseModel):
 # 🔄 Schema for returning unit data
 class UnitResponse(UnitCreate):
     id: int
-    property_id: int  # Will be automatically assigned in the service logic
+    # property_id: int  # Will be automatically assigned in the service logic
 
     class Config:
         from_attributes = True
