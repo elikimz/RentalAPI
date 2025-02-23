@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -123,3 +123,14 @@ class PaymentCreate(BaseModel):
 class PaymentUpdate(BaseModel):
     amount_paid: Optional[float] = None
     payment_status: Optional[str] = None        
+
+
+class PaymentResponse(BaseModel):
+    # payment_id: str
+    # checkout_url: str
+    amount_paid: float
+    payment_status: str
+
+    class Config:
+        orm_mode = True
+
