@@ -127,7 +127,7 @@ class PaymentUpdate(BaseModel):
 
 class PaymentResponse(BaseModel):
     # payment_id: str
-    # checkout_url: str
+    checkout_url: str
     amount_paid: float
     payment_status: str
 
