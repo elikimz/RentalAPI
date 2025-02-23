@@ -9,7 +9,7 @@ from app.routers.auth import get_current_user, require_role
 router = APIRouter()
 
 # 🏠 Create a Lease (Only Admins can create leases)
-@router.post("/leases", response_model=LeaseResponse)
+@router.post("/", response_model=LeaseResponse)
 def create_lease(
     lease_data: LeaseCreate,
     db: Session = Depends(get_db),
@@ -42,7 +42,7 @@ def create_lease(
 
 
 # 📋 Get All Leases (Admins see all, Tenants see their own)
-@router.get("/leases", response_model=List[LeaseResponse])
+@router.get("/", response_model=List[LeaseResponse])
 def get_leases(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -56,7 +56,7 @@ def get_leases(
 
 
 # 🔍 Get Single Lease (Only Admins or the Tenant)
-@router.get("/leases/{lease_id}", response_model=LeaseResponse)
+@router.get("/{lease_id}", response_model=LeaseResponse)
 def get_lease(
     lease_id: int,
     db: Session = Depends(get_db),
@@ -71,7 +71,7 @@ def get_lease(
 
 
 # ✏️ Update Lease (Only Admins or the Tenant)
-@router.put("/leases/{lease_id}", response_model=LeaseResponse)
+@router.put("/{lease_id}", response_model=LeaseResponse)
 def update_lease(
     lease_id: int,
     lease_data: LeaseCreate,
@@ -98,7 +98,7 @@ def update_lease(
 
 
 # ❌ Delete Lease (Only Admins)
-@router.delete("/leases/{lease_id}")
+@router.delete("/{lease_id}")
 def delete_lease(
     lease_id: int,
     db: Session = Depends(get_db),
