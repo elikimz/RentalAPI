@@ -6,10 +6,11 @@ from app.routers import auth, user, properties, units, tenant, lease, payments
 # ✅ Initialize FastAPI app
 app = FastAPI()
 
+
 # ✅ Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this to specific domains for security
+    allow_origins=["http://localhost:5173"], # Change this to specific domains for security
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
