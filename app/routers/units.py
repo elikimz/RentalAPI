@@ -12,7 +12,7 @@ router = APIRouter()
 
 # Create a Unit (Admin only)
 # Create a Unit
-@router.post("/units", response_model=UnitResponse)
+@router.post("/", response_model=UnitResponse)
 def create_unit(
     unit: UnitCreate,
     db: Session = Depends(get_db),
@@ -37,7 +37,7 @@ def create_unit(
 
 
 # Get All Units (Protected)
-@router.get("/units", response_model=List[UnitResponse])
+@router.get("/", response_model=List[UnitResponse])
 async def get_units(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
@@ -46,7 +46,7 @@ async def get_units(
 
 
 # Get Unit by ID (Protected)
-@router.get("/units/{unit_id}", response_model=UnitResponse)
+@router.get("/{unit_id}", response_model=UnitResponse)
 async def get_unit(unit_id: int, db: Session = Depends(get_db)):
     unit = db.query(Unit).filter(Unit.id == unit_id).first()
     if not unit:
@@ -55,7 +55,7 @@ async def get_unit(unit_id: int, db: Session = Depends(get_db)):
 
 
 # Update Unit (Admin only)
-@router.put("/units/{unit_id}", response_model=UnitResponse)
+@router.put("/{unit_id}", response_model=UnitResponse)
 async def update_unit(
     unit_id: int,
     unit_data: UnitCreate,
@@ -73,7 +73,7 @@ async def update_unit(
 
 
 # Delete Unit (Admin only)
-@router.delete("/units/{unit_id}")
+@router.delete("/{unit_id}")
 async def delete_unit(
     unit_id: int,
     db: Session = Depends(get_db),
