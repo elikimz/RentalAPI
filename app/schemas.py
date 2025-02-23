@@ -120,3 +120,6 @@ class PaymentCreate(BaseModel):
     amount_paid: float  # Only the amount paid will be included in the request
     class Config:
         orm_mode = True
+class PaymentUpdate(BaseModel):
+    amount_paid: Optional[float] = None
+    payment_status: Optional[str] = None        
