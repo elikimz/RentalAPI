@@ -87,9 +87,9 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     
     # Create an access token with a 30-minute expiry time
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = utils.create_access_token(data={"sub": user.email, "role": user.role}, expires_delta=access_token_expires)
+    access_token = utils.create_access_token(data={"sub": user.email, "role": user.role ,"id":user.id ,"full_name":user.full_name}, expires_delta=access_token_expires)
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer","id": user.id,"full_name":user.full_name}
 
 # Helper function to get the current logged-in user based on the token
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
