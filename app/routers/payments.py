@@ -344,6 +344,21 @@ async def get_all_payments(
     return payment_responses
 
 
+@router.get("/payments/verify")
+async def verify_payment(session_id: str, db: Session = Depends(get_db)):
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        
+        payment = db.query(Payment).filter_by(stripe_payment_intent_id=session_id).first()
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+        return {"status": session.payment_status}
+        
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=400, detail=f"Stripe error: {e.user_message}")
+
+
 # 💜 Get Payment by ID (Admin & Tenant)
 @router.get("/{payment_id}", response_model=PaymentResponse)
 async def get_payment(
