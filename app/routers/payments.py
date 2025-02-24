@@ -268,8 +268,8 @@ async def create_payment(
                 }
             ],
             mode="payment",
-            success_url="https://your-website.com/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="https://your-website.com/cancel",
+            success_url="https://vercel.com/elikimzs-projects/rental/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="https://vercel.com/elikimzs-projects/rental/cancel",
             metadata={"lease_id": lease.id, "tenant_id": tenant.id},
         )
 
