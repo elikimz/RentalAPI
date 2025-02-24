@@ -40,7 +40,7 @@ app = FastAPI()
 
 # ✅ Allowed origins (Frontend URLs)
 origins = [
-    "http://localhost:5173",  # Local frontend
+     # Local frontend
     "https://rental-eta-lake.vercel.app"  # Deployed frontend on Vercel
 ]
 
