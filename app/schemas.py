@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 from typing import Optional
 
 class UserCreate(BaseModel):
@@ -41,13 +41,14 @@ class PropertyCreate(BaseModel):
     name: str
     location: str
     description: Optional[str] = ""
-
+    image_url: str 
 
 class PropertyResponse(BaseModel):
     id: int
     name: str
     location:str 
-    description: Optional[str] = ""  
+    description: Optional[str] = "" 
+    image_url: str 
   
 
     class Config:
@@ -136,3 +137,27 @@ class PaymentResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
+
+
+
+class TicketCreate(BaseModel):
+   
+    subject: str
+    description: str
+
+class TicketUpdate(BaseModel):
+    subject: Optional[str]
+    description: Optional[str]
+    status: Optional[str]  # Open, In Progress, Closed
+
+class TicketResponse(BaseModel):
+    id: int
+    tenant_id: int
+    subject: str
+    description: str
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
