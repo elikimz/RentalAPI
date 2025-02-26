@@ -268,7 +268,7 @@ async def create_payment(
                 }
             ],
             mode="payment",
-            success_url="https://rental-eta-lake.vercel.app/success?session_id={CHECKOUT_SESSION_ID}",
+            success_url="https://rental-eta-lake.vercel.app/success",
             cancel_url="https://rental-eta-lake.vercel.app/cancel",
             metadata={"lease_id": lease.id, "tenant_id": tenant.id},
         )
