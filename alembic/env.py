@@ -1,43 +1,48 @@
+import os
 from logging.config import fileConfig
-from sqlalchemy import create_engine, pool
+from sqlalchemy import engine_from_config, pool
 from alembic import context
-# env.py
-from app.models import User, Property, Unit, Tenant, Lease, Payment  # Import your models here
 
-# Import your database models
+# ✅ Import your database Base
 from app.database import Base  
-from app.config import DATABASE_URL  # Import the database URL from config
 
-# Alembic Config object
+# ✅ Import ALL models to register metadata
+from app.models import User,Unit,Tenant,Payment,Property,Lease,SupportTicket
+
+# ✅ Set target metadata
+target_metadata = Base.metadata
+
+# ✅ Get database URL from environment variables
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# ✅ Configure Alembic to use the correct database URL
 config = context.config
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
-# Setup logging
-if config.config_file_name is not None:
+# ✅ Logging setup
+if config.config_file_name:
     fileConfig(config.config_file_name)
 
-# Set target metadata for autogenerate support
-target_metadata = Base.metadata  
-
-def run_migrations_offline() -> None:
+def run_migrations_offline():
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=DATABASE_URL,  # Use the correct database URL
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
-
     with context.begin_transaction():
         context.run_migrations()
 
-def run_migrations_online() -> None:
+def run_migrations_online():
     """Run migrations in 'online' mode."""
-    connectable = create_engine(DATABASE_URL, poolclass=pool.NullPool)
-
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
-
         with context.begin_transaction():
             context.run_migrations()
 

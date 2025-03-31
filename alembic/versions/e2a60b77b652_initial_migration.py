@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 937f2af4558c
-Revises: 4cb7ac4ecf0c
-Create Date: 2025-02-21 15:49:18.247447
+Revision ID: e2a60b77b652
+Revises: b5f3ada00eb1
+Create Date: 2025-03-24 20:58:38.510521
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '937f2af4558c'
-down_revision: Union[str, None] = '4cb7ac4ecf0c'
+revision: str = 'e2a60b77b652'
+down_revision: Union[str, None] = 'b5f3ada00eb1'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -35,8 +35,10 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('location', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('image_url', sa.String(), nullable=True),
     sa.Column('admin_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['admin_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['admin_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_properties_id'), 'properties', ['id'], unique=False)
@@ -46,17 +48,28 @@ def upgrade() -> None:
     sa.Column('full_name', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('phone_number', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_tenants_id'), 'tenants', ['id'], unique=False)
+    op.create_table('support_tickets',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('tenant_id', sa.Integer(), nullable=True),
+    sa.Column('subject', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=False),
+    sa.Column('status', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_support_tickets_id'), 'support_tickets', ['id'], unique=False)
     op.create_table('units',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('status', sa.String(), nullable=True),
     sa.Column('property_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['property_id'], ['properties.id'], ),
+    sa.ForeignKeyConstraint(['property_id'], ['properties.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_units_id'), 'units', ['id'], unique=False)
@@ -71,8 +84,8 @@ def upgrade() -> None:
     sa.Column('lease_status', sa.String(), nullable=True),
     sa.Column('created_at', sa.Date(), nullable=True),
     sa.Column('updated_at', sa.Date(), nullable=True),
-    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
-    sa.ForeignKeyConstraint(['unit_id'], ['units.id'], ),
+    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['unit_id'], ['units.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_leases_id'), 'leases', ['id'], unique=False)
@@ -85,8 +98,8 @@ def upgrade() -> None:
     sa.Column('stripe_payment_intent_id', sa.String(), nullable=True),
     sa.Column('stripe_charge_id', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['lease_id'], ['leases.id'], ),
-    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
+    sa.ForeignKeyConstraint(['lease_id'], ['leases.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('stripe_charge_id'),
     sa.UniqueConstraint('stripe_payment_intent_id')
@@ -103,6 +116,8 @@ def downgrade() -> None:
     op.drop_table('leases')
     op.drop_index(op.f('ix_units_id'), table_name='units')
     op.drop_table('units')
+    op.drop_index(op.f('ix_support_tickets_id'), table_name='support_tickets')
+    op.drop_table('support_tickets')
     op.drop_index(op.f('ix_tenants_id'), table_name='tenants')
     op.drop_table('tenants')
     op.drop_index(op.f('ix_properties_id'), table_name='properties')
